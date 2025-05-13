@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>VibeCheck</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="login-container" class="centered">
+    <h2>VibeCheck Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="loginBtn">Login</button>
+    <p>or <a href="#" id="signupLink">Sign up</a></p>
+  </div>
+
+  <div id="chat-container" class="hidden">
+    <h2>Welcome to VibeCheck</h2>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type your message..." />
+    <button id="sendBtn">Send</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <!-- Main App JS -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
