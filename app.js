@@ -1,14 +1,12 @@
 // app.js
-import firebaseConfig from './firebaseConfig.js';
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import firebaseConfig from "./firebaseConfig.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import {
   getFirestore,
@@ -17,7 +15,10 @@ import {
   onSnapshot,
   query,
   orderBy,
-  serverTimestamp
+  serverTimestamp,
+  setDoc,
+  doc,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // Initialize Firebase
@@ -26,39 +27,81 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // UI Elements
-const loginContainer = document.getElementById('login-container');
-const chatContainer = document.getElementById('chat-container');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const messageInput = document.getElementById('messageInput');
-const messagesDiv = document.getElementById('messages');
+const loginContainer = document.getElementById("login-container");
+const chatContainer = document.getElementById("chat-container");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const messageInput = document.getElementById("messageInput");
+const messagesDiv = document.getElementById("messages");
+const displayNameInput = document.getElementById("displayName");
 
-document.getElementById('loginBtn').addEventListener('click', login);
-document.getElementById('signupLink').addEventListener('click', signup);
-document.getElementById('logoutBtn').addEventListener('click', logout);
-document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById("loginBtn").addEventListener("click", () => {
+  if (isSignupMode) {
+    signup();
+  } else {
+    login();
+  }
+});
+document.getElementById("signupLink").addEventListener("click", signup);
+document.getElementById("logoutBtn").addEventListener("click", logout);
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
+
+let isSignupMode = false;
+
+document.getElementById("signupLink").addEventListener("click", (e) => {
+  e.preventDefault();
+  isSignupMode = !isSignupMode;
+
+  if (isSignupMode) {
+    displayNameInput.style.display = "block";
+    loginBtn.textContent = "Sign Up";
+  } else {
+    displayNameInput.style.display = "none";
+    loginBtn.textContent = "Login";
+  }
+});
 
 // Auth Functions
 function login() {
-    if (!emailInput.value || !passwordInput.value) {
-      alert("Email and password are required.");
-      return;
-    }
-  
-    signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-      .then(() => {
-        emailInput.value = '';
-        passwordInput.value = '';
-      })
-      .catch(error => alert(error.message));
+  if (!emailInput.value || !passwordInput.value) {
+    alert("Email and password are required.");
+    return;
   }
 
+  signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+    .then(() => {
+      emailInput.value = "";
+      passwordInput.value = "";
+    })
+    .catch((error) => alert(error.message));
+}
+
 function signup() {
-  createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  const displayName = displayNameInput.value.trim();
+
+  if (!email || !password || !displayName) {
+    alert("Email, password, and display name are required.");
+    return;
+  }
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      // Save display name in Firestore under users/{uid}
+      return setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        displayName: displayName,
+      });
+    })
     .then(() => {
       alert("Account created! You can now log in.");
     })
-    .catch(error => alert(error.message));
+    .catch((error) => {
+      console.error("Signup error:", error);
+      alert("Signup failed: " + error.message);
+    });
 }
 
 function logout() {
@@ -66,14 +109,14 @@ function logout() {
 }
 
 // Real-time Listener
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    loginContainer.classList.add('hidden');
-    chatContainer.classList.remove('hidden');
+    loginContainer.classList.add("hidden");
+    chatContainer.classList.remove("hidden");
     loadMessages();
   } else {
-    loginContainer.classList.remove('hidden');
-    chatContainer.classList.add('hidden');
+    loginContainer.classList.remove("hidden");
+    chatContainer.classList.add("hidden");
   }
 });
 
@@ -85,23 +128,45 @@ function sendMessage() {
   addDoc(collection(db, "messages"), {
     text: text,
     createdAt: serverTimestamp(),
-    user: auth.currentUser.email
+    user: auth.currentUser.email,
   });
 
-  messageInput.value = '';
+  messageInput.value = "";
 }
 
 // Load messages
-function loadMessages() {
+const userCache = {};
+
+async function loadMessages() {
   const q = query(collection(db, "messages"), orderBy("createdAt"));
-  onSnapshot(q, snapshot => {
-    messagesDiv.innerHTML = '';
-    snapshot.forEach(doc => {
-      const msg = doc.data();
-      const div = document.createElement('div');
-      div.textContent = `${msg.user}: ${msg.text}`;
+  onSnapshot(q, async (snapshot) => {
+    messagesDiv.innerHTML = "";
+
+    for (const docSnap of snapshot.docs) {
+      const msg = docSnap.data();
+
+      let name = msg.user;
+
+      // Try to get cached display name
+      if (!userCache[name]) {
+        try {
+          const userDocs = await getDocs(collection(db, "users"));
+          userDocs.forEach((doc) => {
+            const data = doc.data();
+            userCache[data.email] = data.displayName;
+          });
+        } catch (e) {
+          console.error("Error fetching users:", e);
+        }
+      }
+
+      const displayName = userCache[msg.user] || msg.user;
+
+      const div = document.createElement("div");
+      div.textContent = `${displayName}: ${msg.text}`;
       messagesDiv.appendChild(div);
-    });
+    }
+
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 }

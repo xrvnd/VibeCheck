@@ -1,60 +1,99 @@
+/* ====== Base Styles ====== */
+:root {
+  --main-bg: linear-gradient(to right, #74ebd5, #acb6e5);
+  --input-bg: #f5f5f5;
+  --primary-color: #007bff;
+  --focus-shadow: rgba(0, 0, 0, 0.3);
+}
+
 body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(to right, #74ebd5, #acb6e5);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .centered {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    width: 300px;
-  }
-  
-  input {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 80%;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
-  button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  #messages {
-    height: 300px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    background: #f4f4f4;
-    padding: 10px;
-    border-radius: 4px;
-    text-align: left;
-  }
-  
-  #messages div {
-    margin-bottom: 5px;
-    padding: 4px;
-    background: #e2f0ff;
-    border-radius: 4px;
-  }
-  
-  .hidden {
-    display: none;
-  }
-  
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--main-bg);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ====== Containers ====== */
+.centered {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 300px;
+}
+
+/* ====== Inputs and Buttons ====== */
+input,
+button,
+#messageInput {
+  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+input {
+  display: block;
+  margin: 10px auto;
+  width: 80%;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* ====== Message Input (Chat Box) ====== */
+#messageInput {
+  caret-color: black;
+  font-family: monospace;
+  font-size: 16px;
+  outline: none;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+#messageInput:focus {
+  box-shadow: 0 0 5px var(--focus-shadow);
+  border-color: #666;
+}
+
+/* ====== Message Display ====== */
+#messages {
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: left;
+  font-family: monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+
+#messages div {
+  background-color: var(--input-bg);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+/* ====== Misc Utility ====== */
+.hidden {
+  display: none;
+}
+
+#displayName {
+  display: none;
+}
