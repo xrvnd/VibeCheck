@@ -1,13 +1,12 @@
 // Replace these with your project's config
 const firebaseConfig = {
-    apiKey: "AIzaSyCwznbtHU2AwcC-azEMvt705QfHkgwn_kU",
-    authDomain: "vibecheck-9fcd6.firebaseapp.com",
-    projectId: "vibecheck-9fcd6",
-    storageBucket: "vibecheck-9fcd6.firebasestorage.app",
-    messagingSenderId: "191428576432",
-    appId: "1:191428576432:web:1fa15a7fd824569d916775",
-    measurementId: "G-27B2RW8KE1"
-  };
-  
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+};
 
 export default firebaseConfig;
